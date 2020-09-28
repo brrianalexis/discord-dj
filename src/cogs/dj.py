@@ -1,3 +1,4 @@
+import os
 import math
 import re
 from discord.ext import commands
@@ -13,12 +14,12 @@ class MusicCog(commands.Cog):
         self.bot = bot
         self.bot.music = lavalink.Client(self.bot.user.id)
         self.bot.music.add_node(
-            'localhost', 8000, 'estonoesporno', 'br', 'music-node')
+            'localhost', 8000, os.getenv('LAVALINK_PASS'), 'br', 'music-node')
         self.bot.add_listener(
             self.bot.music.voice_update_handler, 'on_socket_response')
         self.bot.music.add_event_hook(self.track_hook)
 
-    # *     works
+    # *     makes the bot join the voice channel where the user is
     @commands.command(name='join')
     async def join(self, ctx):
         member = utils.find(lambda m: m.id == ctx.author.id, ctx.guild.members)
@@ -30,7 +31,7 @@ class MusicCog(commands.Cog):
                 player.store('channel', ctx.channel.id)
                 await self.connect_to(ctx.guild.id, str(vc.id))
 
-    # *     works
+    # *     disconnects the bot from the voice channel
     @commands.command(name='nv')
     async def disconnect(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -48,7 +49,7 @@ class MusicCog(commands.Cog):
         await self.connect_to(ctx.guild.id, None)
         await ctx.send('Nv 👋🏻')
 
-    # *     works
+    # *     searches for a video on youtube
     @commands.command(name='play')
     async def play(self, ctx, *, query):
         try:
@@ -81,7 +82,7 @@ class MusicCog(commands.Cog):
         except Exception as error:
             print(error)
 
-    # *     works
+    # *     changes the volume using an int from 1 to 100
     @commands.command(name='vol')
     async def volume(self, ctx, volume: int = None):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -92,7 +93,7 @@ class MusicCog(commands.Cog):
         await player.set_volume(volume)
         await ctx.send(f'🔊 | Cambié el volumen a {player.volume}%')
 
-    # *     works
+    # *     stops playback
     @commands.command(name='stop')
     async def stop(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -104,7 +105,7 @@ class MusicCog(commands.Cog):
         await player.stop()
         await ctx.send('⏹ | Parado')
 
-    # *     works
+    # *     pauses/resumes playback
     @commands.command(name='pause')
     async def pause(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -119,7 +120,7 @@ class MusicCog(commands.Cog):
             await player.set_pause(True)
             await ctx.send('⏸ | Pausado')
 
-    # *     works
+    # *     skips the video being played currently
     @commands.command(name='skip')
     async def skip(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -130,7 +131,7 @@ class MusicCog(commands.Cog):
         await ctx.send('⏭ | Salteado')
         await player.skip()
 
-    # *     works
+    # *     returns the queue in pages of up to 10 tracks
     @commands.command(name='queue')
     async def queue(self, ctx, page: int = 1):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -154,13 +155,11 @@ class MusicCog(commands.Cog):
         embed.set_footer(text=f'Página {page}/{pages}')
         await ctx.send(embed=embed)
 
-    # *     works
+    # *     returns what is currently being played
     @commands.command(name='now')
     async def now(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
         song = 'Nothing'
-
-        print(dir(lavalink))
 
         if player.current:
             position = lavalink.format_time(player.position)
@@ -174,7 +173,7 @@ class MusicCog(commands.Cog):
                       title='Reproduciendo', description=song)
         await ctx.send(embed=embed)
 
-    # !     debug
+    # *     rewind/fast-forward
     @commands.command(name='seek')
     async def seek(self, ctx, time):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -183,7 +182,7 @@ class MusicCog(commands.Cog):
             return await ctx.send('No estoy reproduciendo nada 😶')
 
         position = '+'
-        if time.startsWith('-'):
+        if time.startswith('-'):
             position = '-'
 
         seconds = time_rx.search(time)
@@ -202,7 +201,7 @@ class MusicCog(commands.Cog):
 
         await ctx.send(f'Moví el track a **{lavalink.format_time(track_time)}**')
 
-    # *     works
+    # *     removes the track with the specified index from the queue
     @commands.command(name='remove')
     async def remove(self, ctx, index: int):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -218,7 +217,7 @@ class MusicCog(commands.Cog):
 
         await ctx.send('Quité **' + removed.title + '** de la queue')
 
-    # *     works
+    # *     toggles shuffle
     @commands.command(name='shuffle')
     async def shuffle(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
@@ -230,7 +229,7 @@ class MusicCog(commands.Cog):
 
         await ctx.send('🔀 | Shuffle ' + ('activado' if player.shuffle else 'desactivado'))
 
-    # *     works
+    # *     toggles repeat
     @commands.command(name='repeat')
     async def repeat(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
