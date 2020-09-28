@@ -188,7 +188,7 @@ class MusicCog(commands.Cog):
         seconds = time_rx.search(time)
 
         if not seconds:
-            return await ctx.send('Tenés que especificar la cantidad de segundos a saltear 🤡')
+            return await ctx.send('Tenés que especificar la cantidad de segundos a saltear en el siguiente formato:\n```**-20** <- retrocede 20 segundos\n**+20** <- avanza 20 segundos```')
 
         seconds = int(seconds.group()) * 1000
 
