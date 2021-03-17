@@ -2,3 +2,4 @@ logs
 .env
 application.yml
 *.jar
+.vscode
