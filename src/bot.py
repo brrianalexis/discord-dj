@@ -2,7 +2,10 @@ import discord
 import os
 from discord.ext import commands
 
-bot = commands.Bot(command_prefix=os.getenv('PREFIX'))
+intents = discord.Intents.default()
+intents.members = True
+
+bot = commands.Bot(command_prefix=os.getenv('PREFIX'), intents=intents)
 
 # pipenv run lavalink para levantar el servidor de lavalink
 # pipenv run dev para levantar el bot
